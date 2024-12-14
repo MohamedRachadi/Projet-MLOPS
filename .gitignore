@@ -1,0 +1,21 @@
+# Dossiers d'environnements virtuels
+venv/
+*.env
+
+# Fichiers de configuration IDE
+.vscode/
+.idea/
+
+# Fichiers de log
+*.log
+
+# Fichiers système
+.DS_Store      # macOS
+Thumbs.db      # Windows
+
+# Fichiers de base de données SQLite
+*.db
+
+# Sauvegardes
+*~
+*.bak
