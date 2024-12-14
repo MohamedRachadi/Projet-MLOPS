@@ -5,8 +5,9 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
 import joblib
+import pandas as pd
 
-
+mlflow.set_tracking_uri("http://127.0.0.1:8080")
 
 #Crée une fonction générique qui pourra entraîner plusieurs types de modèles
 def train_model(model, X_train, y_train, X_test, y_test):
@@ -16,7 +17,7 @@ def train_model(model, X_train, y_train, X_test, y_test):
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
-    rmse = mean_squared_error(y_test, y_pred, squared=False)
+    rmse = mean_squared_error(y_test, y_pred)
     mae = mean_absolute_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
 
@@ -35,8 +36,19 @@ def log_experiment(model_name, model, X_train, y_train, X_test, y_test):
         mlflow.log_metric("mae", mae)
         mlflow.log_metric("r2", r2)
 
-        # Log du modèle dans MLflow
-        mlflow.sklearn.log_model(trained_model, "model")
+        input_example = pd.DataFrame({
+            "MedInc": [1.0],
+            "HouseAge": [15.0],
+            "AveRooms": [6.0],
+            "AveBedrms": [2.0],
+            "Population": [300.0],
+            "AveOccup": [4.0],
+            "Latitude": [37.0],
+            "Longitude": [-122.0]
+        })
+
+        # Log du modèle avec un exemple d'entrée
+        mlflow.sklearn.log_model(trained_model, "model", input_example=input_example)
         
         return trained_model, rmse, mae, r2
 
