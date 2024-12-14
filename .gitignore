@@ -1,0 +1,8 @@
+# Environnements virtuels
+mlops_env/
+# Fichiers temporaires
+*.pyc
+__pycache__/
+.DS_Store
+# Données brutes
+data/
