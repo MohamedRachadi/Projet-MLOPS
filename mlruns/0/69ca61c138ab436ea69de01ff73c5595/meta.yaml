@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/0/69ca61c138ab436ea69de01ff73c5595/artifacts
+end_time: 1734185785691
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 69ca61c138ab436ea69de01ff73c5595
+run_name: bustling-sloth-222
+run_uuid: 69ca61c138ab436ea69de01ff73c5595
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1734185770767
+status: 3
+tags: []
+user_id: mrach

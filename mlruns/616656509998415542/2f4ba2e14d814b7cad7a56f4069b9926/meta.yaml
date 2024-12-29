@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/616656509998415542/2f4ba2e14d814b7cad7a56f4069b9926/artifacts
+end_time: 1735473699729
+entry_point_name: ''
+experiment_id: '616656509998415542'
+lifecycle_stage: active
+run_id: 2f4ba2e14d814b7cad7a56f4069b9926
+run_name: Linear Regression
+run_uuid: 2f4ba2e14d814b7cad7a56f4069b9926
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1735473693273
+status: 3
+tags: []
+user_id: mrach

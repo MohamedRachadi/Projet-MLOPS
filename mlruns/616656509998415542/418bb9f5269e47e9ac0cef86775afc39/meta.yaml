@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/616656509998415542/418bb9f5269e47e9ac0cef86775afc39/artifacts
+end_time: 1735476113095
+entry_point_name: ''
+experiment_id: '616656509998415542'
+lifecycle_stage: active
+run_id: 418bb9f5269e47e9ac0cef86775afc39
+run_name: 'Best Model Registration: California_Housing_Best_Model_RandomForestRegressor'
+run_uuid: 418bb9f5269e47e9ac0cef86775afc39
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1735476108203
+status: 3
+tags: []
+user_id: mrach

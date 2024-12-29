@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/616656509998415542/f44bf81e51a3445cb2e1e44ac95b2995/artifacts
+end_time: 1735470351211
+entry_point_name: ''
+experiment_id: '616656509998415542'
+lifecycle_stage: active
+run_id: f44bf81e51a3445cb2e1e44ac95b2995
+run_name: Best Model Registration
+run_uuid: f44bf81e51a3445cb2e1e44ac95b2995
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1735470346481
+status: 3
+tags: []
+user_id: mrach
