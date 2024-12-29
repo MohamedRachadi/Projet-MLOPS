@@ -6,8 +6,10 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
 import joblib
 import pandas as pd
+from skopt import BayesSearchCV
+from skopt.space import Real, Integer
 
-mlflow.set_tracking_uri("http://127.0.0.1:8080")
+mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
 #Crée une fonction générique qui pourra entraîner plusieurs types de modèles
 def train_model(model, X_train, y_train, X_test, y_test):
@@ -25,10 +27,12 @@ def train_model(model, X_train, y_train, X_test, y_test):
 
 
 #Mettre en place MLflow pour suivre les expériences
-def log_experiment(model_name, model, X_train, y_train, X_test, y_test):
+def log_experiment(model_name, model, X_train, y_train, X_test, y_test, hyperparameters=None):
     mlflow.set_experiment("California Housing Project")
     with mlflow.start_run(run_name=model_name):
         mlflow.log_param("model_name", model_name)
+        if hyperparameters:
+            mlflow.log_params(hyperparameters)
 
         trained_model, rmse, mae, r2 = train_model(model, X_train, y_train, X_test, y_test)
 
@@ -54,34 +58,98 @@ def log_experiment(model_name, model, X_train, y_train, X_test, y_test):
         return trained_model, rmse, mae, r2
 
 
+# Optimisation bayésienne pour chaque modèle
+def optimize_model(model, param_space, X_train, y_train):
+    opt = BayesSearchCV(
+        model, 
+        param_space, 
+        n_iter=20, 
+        scoring='neg_mean_squared_error',  # Utilisation de MSE négatif pour maximiser le score
+        cv=3,  # Validation croisée à 3 plis
+        n_jobs=-1, 
+        random_state=42
+    )
+    
+    opt.fit(X_train, y_train)
+    return opt.best_estimator_, opt.best_params_, -opt.best_score_
+
+
 #Tester différents modèles
 def compare_models(X_train, y_train, X_test, y_test):
     models = {
         "Linear Regression": LinearRegression(),
-        "Random Forest": RandomForestRegressor(n_estimators=100, random_state=42),
-        "Gradient Boosting": GradientBoostingRegressor(n_estimators=100, random_state=42)
+        "Random Forest": RandomForestRegressor(random_state=42),
+        "Gradient Boosting": GradientBoostingRegressor(random_state=42)
+    }
+
+    # Définir les espaces d'hyperparamètres pour chaque modèle
+    param_spaces = {
+        "Linear Regression": {
+            'fit_intercept': [True, False]
+        },
+        "Random Forest": {
+            'n_estimators': Integer(50, 150),
+            'max_depth': Integer(5, 10),
+            'min_samples_split': Integer(2, 10),
+            'min_samples_leaf': Integer(1, 5)
+        },
+        "Gradient Boosting": {
+            'n_estimators': Integer(50, 150),
+            'learning_rate': Real(0.001, 0.01, prior='uniform'),
+            'max_depth': Integer(3, 8),
+            'min_samples_split': Integer(2, 10),
+            'min_samples_leaf': Integer(1, 5)
+        }
     }
 
     best_model = None
     best_rmse = float('inf')
+    best_model_name = ""
 
-    # Comparer les modèles
+    # Comparer les modèles avec optimisation bayésienne
     for model_name, model in models.items():
-        trained_model, rmse, mae, r2 = log_experiment(model_name, model, X_train, y_train, X_test, y_test)
+        print(f"\n--------------------------------------------- Optimizing {model_name}... ---------------------------------------------\n")
+        best_model, best_params, best_score = optimize_model(model, param_spaces[model_name], X_train, y_train)
 
-        print(f"{model_name}: RMSE={rmse}, MAE={mae}, R²={r2}")
+        print(f"Best parameters for {model_name}: {best_params}")
+        print(f"Best score (RMSE) for {model_name}: {best_score}")
+        
+        # Log des hyperparamètres et métriques
+        log_experiment(model_name, best_model, X_train, y_train, X_test, y_test, hyperparameters=best_params)
 
         # Garder le meilleur modèle basé sur RMSE
-        if rmse < best_rmse:
-            best_rmse = rmse
-            best_model = trained_model
+        if best_score < best_rmse:
+            best_rmse = best_score
+            best_model_name = model_name
+            final_best_model = best_model
 
     # Retourner le meilleur modèle
-    return best_model
+    print(f"Best model: {best_model_name} with RMSE: {best_rmse}")
+    print("\n ----------------------------------------------------------------------------- \n")
+    return final_best_model
 
-
-#Enregistrer le meilleur modèle dans le Model Registry
 def register_best_model(best_model):
-    with mlflow.start_run():
-        mlflow.sklearn.log_model(best_model, "best_model")
-        print("Le meilleur modèle a été enregistré dans le Model Registry.")
+    # Définir un nom spécifique pour le modèle dans le Model Registry
+    model_name = f"California_Housing_Best_Model_{best_model.__class__.__name__}"  # Utilisation du nom de classe du modèle
+
+    # Exemple d'entrée sous forme de DataFrame
+    input_example = pd.DataFrame({
+        "MedInc": [1.0],            # Exemple de valeur pour chaque caractéristique
+        "HouseAge": [15.0],
+        "AveRooms": [6.0],
+        "AveBedrms": [2.0],
+        "Population": [300.0],
+        "AveOccup": [4.0],
+        "Latitude": [37.0],
+        "Longitude": [-122.0]
+    })
+
+    with mlflow.start_run(run_name=f"Best Model Registration: {model_name}"):
+        # Enregistrer le modèle avec l'exemple d'entrée
+        mlflow.sklearn.log_model(
+            sk_model=best_model, 
+            artifact_path="best_model",  # L'endroit où le modèle sera stocké dans le run
+            registered_model_name=model_name,  # Nom pour le Model Registry
+            input_example=input_example  # L'exemple d'entrée pour déduire la signature du modèle
+        )
+        print(f"Le meilleur modèle a été enregistré dans le Model Registry avec le nom '{model_name}'.")
