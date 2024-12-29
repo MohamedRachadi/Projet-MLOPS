@@ -26,7 +26,8 @@ def train_model(model, X_train, y_train, X_test, y_test):
 
 #Mettre en place MLflow pour suivre les expériences
 def log_experiment(model_name, model, X_train, y_train, X_test, y_test):
-    with mlflow.start_run():
+    mlflow.set_experiment("California Housing Project")
+    with mlflow.start_run(run_name=model_name):
         mlflow.log_param("model_name", model_name)
 
         trained_model, rmse, mae, r2 = train_model(model, X_train, y_train, X_test, y_test)
