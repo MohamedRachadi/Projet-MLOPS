@@ -20,5 +20,4 @@ Thumbs.db      # Windows
 *~
 *.bak
 
-mlruns/
 mlartifacts/
