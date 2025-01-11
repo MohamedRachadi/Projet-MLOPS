@@ -22,12 +22,17 @@ trainer = ModelTrainer()
 trained_rf_model, rmse, mae, r2 = trainer.train_model(best_rf_model, X_train, y_train, X_test, y_test)
 
 # Enregistrer le modèle dans MLflow
-
+mlflow.set_tracking_uri("http://127.0.0.1:5000")
+mlflow.set_experiment(experiment_name="California Housing Project")
 with mlflow.start_run(run_name="RandomForest_Final_Model"):
     mlflow.sklearn.log_model(trained_rf_model, "random_forest_model")
     mlflow.log_metric("rmse", rmse)
     mlflow.log_metric("mae", mae)
     mlflow.log_metric("r2", r2)
+    mlflow.log_param("max_depth", best_rf_model.max_depth)
+    mlflow.log_param("min_samples_leaf", best_rf_model.min_samples_leaf)
+    mlflow.log_param("n_estimators", best_rf_model.n_estimators)
+    mlflow.log_param("random_state", best_rf_model.random_state)
 
 print(f"RandomForest model trained and logged with RMSE: {rmse}, MAE: {mae}, R2: {r2}")
 
