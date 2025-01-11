@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Users/mrach/Desktop/Projet%20MLOPS/src/mlruns/0/0b8a85301f784ad68cde65ebd8a05fe5/artifacts
+end_time: 1736599048081
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 0b8a85301f784ad68cde65ebd8a05fe5
+run_name: RandomForest_Final_Model
+run_uuid: 0b8a85301f784ad68cde65ebd8a05fe5
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1736599041778
+status: 3
+tags: []
+user_id: mrach
