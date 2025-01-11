@@ -7,7 +7,7 @@ import pandas as pd
 app = FastAPI()
 
 # Charger le modèle depuis MLflow
-model = mlflow.sklearn.load_model("models:/best_model/1")  # Charger le modèle avec la version appropriée
+model = mlflow.sklearn.load_model("models:/Best_Model_RandomForestRegressor/1")  # Charger le modèle avec la version appropriée
 
 # Définir un schéma Pydantic pour la validation des données entrantes
 class InputData(BaseModel):

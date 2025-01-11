@@ -157,7 +157,7 @@ class BestModelRegistry:
     """
     @staticmethod
     def register_best_model(best_model, best_params):
-        model_name = f"California_Housing_Best_Model_{best_model.__class__.__name__}"
+        model_name = f"Best_Model_{best_model.__class__.__name__}"
         input_example = pd.DataFrame({
             "MedInc": [1.0], "HouseAge": [15.0], "AveRooms": [6.0],
             "AveBedrms": [2.0], "Population": [300.0], "AveOccup": [4.0],

@@ -1,23 +1,30 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from model_training import compare_models, register_best_model
-import mlflow
-import mlflow.sklearn
+from model_classes import ModelComparator, MLFlowLogger, BestModelRegistry
 
-# Charger les données
-X_train = pd.read_csv('../data/X_train.csv')
-X_test = pd.read_csv('../data/X_test.csv')
-y_train = pd.read_csv('../data/y_train.csv')
-y_test = pd.read_csv('../data/y_test.csv')
+# -------------------------------------------------------------------------------------------- #
 
-y_train = y_train.values.ravel()  # Aplatir y_train
-y_test = y_test.values.ravel()    # Aplatir y_test
+data_path = "../data"
+X_train = pd.read_csv(f"{data_path}/X_train.csv")
+X_test = pd.read_csv(f"{data_path}/X_test.csv")
+y_train = pd.read_csv(f"{data_path}/y_train.csv").squeeze()  
+y_test = pd.read_csv(f"{data_path}/y_test.csv").squeeze()
+print("Les données sont chargées.")
 
-# Comparer les modèles et obtenir le meilleur modèle
-best_model = compare_models(X_train, y_train, X_test, y_test)
+# -------------------------------------------------------------------------------------------- #
 
-# Enregistrer le meilleur modèle dans le Model Registry
-register_best_model(best_model)
+logger = MLFlowLogger(experiment_name="California Housing Project")
+comparator = ModelComparator(logger=logger)
+print("Les classes sont initialisées.")
 
-# Afficher que l'enregistrement est fait
-print("Le meilleur modèle a été enregistré dans MLflow.")
+# -------------------------------------------------------------------------------------------- #
+
+best_model, best_params = comparator.compare_models(X_train, y_train, X_test, y_test)
+print("Comparaison des modèles terminée.")
+
+# -------------------------------------------------------------------------------------------- #
+
+registry = BestModelRegistry()
+registry.register_best_model(best_model, best_params)
+print("Le meilleur modèle a été enregistré avec succès.")
+
+
