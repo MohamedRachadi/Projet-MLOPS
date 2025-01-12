@@ -16,14 +16,14 @@ def get_prediction(data):
 st.title("Prédiction de prix immobilier")
 
 # Saisie des paramètres par l'utilisateur
-MedInc = st.number_input("Revenu médian", value=3.0)
-HouseAge = st.number_input("Âge de la maison", value=30.0)
-AveRooms = st.number_input("Nombre moyen de chambres", value=5.0)
-AveBedrms = st.number_input("Nombre moyen de chambres à coucher", value=2.0)
-Population = st.number_input("Population", value=1000.0)
-AveOccup = st.number_input("Occupants moyens par logement", value=3.0)
-Latitude = st.number_input("Latitude", value=34.0)
-Longitude = st.number_input("Longitude", value=-118.0)
+MedInc = st.number_input("Revenu médian", value=0.0)
+HouseAge = st.number_input("Âge de la maison", value=0.0)
+AveRooms = st.number_input("Nombre moyen de chambres", value=0.0)
+AveBedrms = st.number_input("Nombre moyen de chambres à coucher", value=0.0)
+Population = st.number_input("Population", value=0.0)
+AveOccup = st.number_input("Occupants moyens par logement", value=0.0)
+Latitude = st.number_input("Latitude", value=0.0)
+Longitude = st.number_input("Longitude", value=-0.0)
 
 # Créer un dictionnaire avec les données de l'utilisateur
 data = {
@@ -42,6 +42,6 @@ if st.button("Faire la prédiction"):
     result = get_prediction(data)
     
     if "prediction" in result:
-        st.write(f"Le prix de la maison estimé est de ${result['prediction']:.2f}")
+        st.write(f"Le prix de la maison estimé est de {result['prediction']}")
     else:
         st.write(f"Erreur: {result['error']}")

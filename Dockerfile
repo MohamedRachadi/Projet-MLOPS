@@ -18,3 +18,4 @@ EXPOSE 8000
 
 # Lancer l'API avec Uvicorn
 CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["bash", "-c", "uvicorn api:app --host 0.0.0.0 --port 8000 & streamlit run streamlit_app.py --server.port 8501"]
