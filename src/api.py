@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import mlflow
 import pandas as pd
@@ -7,9 +7,17 @@ import pandas as pd
 app = FastAPI()
 
 # Charger le modèle depuis MLflow
-mlflow.set_tracking_uri("http://localhost:5000")
-model_name = "Best_Model_RandomForestRegressor" 
-model = mlflow.sklearn.load_model(f"models:/{model_name}/latest") 
+model = None
+try:
+    mlflow.set_tracking_uri("http://host.docker.internal:5000")
+    model_name = "Best_Model_RandomForestRegressor"
+    model = mlflow.sklearn.load_model(f"models:/{model_name}/latest")
+except Exception as e:
+    print(f"Erreur de connexion ou de chargement du modèle : {str(e)}")
+
+# Vérifier si le modèle a bien été chargé
+if model is None:
+    print("Le modèle n'a pas pu être chargé correctement.")
 
 # Définir un schéma Pydantic pour la validation des données entrantes
 class InputData(BaseModel):
@@ -25,19 +33,15 @@ class InputData(BaseModel):
 # Endpoint pour la prédiction
 @app.post("/predict")
 def predict(data: InputData):
-    """
-    Endpoint qui prend des données sous forme JSON et retourne la prédiction du modèle.
-    """
+    if model is None:
+        raise HTTPException(status_code=500, detail="Le modèle n'est pas disponible pour la prédiction.")
+    
     # Convertir les données entrantes en dataframe
     data_dict = data.dict()
     df = pd.DataFrame([data_dict])
 
     # Faire une prédiction
     prediction = model.predict(df)
-    
+    prediction_in_dollars_str = f"${prediction[0]*100000:,.2f}"  
     # Retourner la prédiction sous forme de réponse JSON
-    return {"prediction": prediction.tolist()}
-
-# Lancer l'API avec Uvicorn
-# Tu dois exécuter dans ton terminal:
-# uvicorn api:app --reload
+    return {"prediction": prediction_in_dollars_str}
