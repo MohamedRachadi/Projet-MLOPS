@@ -41,6 +41,7 @@ class InputData(BaseModel):
 @app.post("/predict")
 def predict(data: InputData):
     if model is None:
+        print("NOOOOOOOOOOOOOOOOO MODELLLLLLLLLLLLL")
         raise HTTPException(status_code=500, detail="Le modèle n'est pas disponible pour la prédiction.")
     
     # Convertir les données entrantes en dataframe
