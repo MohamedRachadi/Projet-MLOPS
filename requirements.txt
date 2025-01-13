@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-mlflow
+mlflow==2.5.0
 scikit-learn
 pandas
 scikit-optimize
