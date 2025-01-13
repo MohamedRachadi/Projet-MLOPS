@@ -26,7 +26,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run testssssss
+      - name: Start API
+        run: |
+          python -m uvicorn src.api:app --host 0.0.0.0 --port 8000 &
+          sleep 15  # Temps pour que l'API démarre
+
+      - name: Run tests
         run: |
           pytest tests/  
 
@@ -57,14 +62,10 @@ jobs:
 
       - name: Test API endpoint
         run: |
-          curl -X POST http://host.docker.internal:8000/predict \
+          curl -X POST http://localhost:8000/predict \
           -H "Content-Type: application/json" \
           -d '{"MedInc": 3.2, "HouseAge": 30, "AveRooms": 6.5, "AveBedrms": 2.0, "Population": 1000, "AveOccup": 3.0, "Latitude": 34.5, "Longitude": -118.5}'
 
       - name: Test if API is running
         run: |
           curl http://localhost:8000  
-
-      - name: Run tests in Docker
-        run: |
-          docker exec mlops-api-container pytest tests/
