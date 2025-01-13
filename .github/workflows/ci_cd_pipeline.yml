@@ -25,28 +25,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Start API with reload
-        run: |
-          uvicorn src.api:app --reload > uvicorn.log 2>&1 &
-          sleep 40  # Temps augmenté pour laisser plus de temps au démarrage de l'API
-
-      - name: Display last 100 lines of API logs
-        run: |
-          tail -n 100 uvicorn.log || true
-
-      - name: Check if uvicorn is running
-        run: |
-          ps aux | grep uvicorn || echo "uvicorn is not running"
-
-      - name: Check open ports
-        run: |
-          netstat -tuln | grep :8000 || echo "Port 8000 is not open"
-
-      - name: Test API locally with curl
-        run: |
-          sleep 5  # Attendez un peu après le démarrage de l'API
-          curl -s http://localhost:8000 || echo "API is not responding"
-
       - name: Run tests
         run: |
           pytest tests/
@@ -58,9 +36,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set environment variable for Docker
-        run: echo "DOCKER=true" >> $GITHUB_ENV
-
       - name: Build Docker image
         run: |
           docker build -t mlops-api .
@@ -69,24 +44,10 @@ jobs:
         run: |
           docker run -d --name mlops-api-container -p 8000:8000 mlops-api
 
-      - name: Wait for API to be ready in Docker
+      - name: Wait for API to start
         run: |
-          timeout=30
-          while ! curl -s http://localhost:8000 > /dev/null; do
-            sleep 1
-            timeout=$((timeout - 1))
-            if [ $timeout -le 0 ]; then
-              echo "API did not start in time."
-              exit 1
-            fi
-          done
+          sleep 10  # Attente pour le démarrage de l'API
 
       - name: Test API endpoint
         run: |
-          curl -X POST http://localhost:8000/predict \
-          -H "Content-Type: application/json" \
-          -d '{"MedInc": 3.2, "HouseAge": 30, "AveRooms": 6.5, "AveBedrms": 2.0, "Population": 1000, "AveOccup": 3.0, "Latitude": 34.5, "Longitude": -118.5}'
-
-      - name: Run tests in Docker
-        run: |
-          docker exec mlops-api-container pytest tests/
+          curl --fail http://localhost:8000/predict || exit 1
