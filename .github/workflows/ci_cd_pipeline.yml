@@ -14,7 +14,7 @@ jobs:
 
     services:
       mlflow:
-        image: "mlflow/mlflow:latest"  # Utilisation de l'image officielle de MLflow
+        image: "mlflow/mlflow:2.4.1"  # Utilisation de l'image officielle de MLflow
         options: --publish 5000:5000   # Publier le port 5000 pour accéder à l'API MLflow
         # Démarrer le container MLflow
 
