@@ -11,6 +11,11 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    services:
+      mlflow:
+        image: mlflow/mlflow:latest
+        ports:
+          - 5000:5000
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -57,7 +62,7 @@ jobs:
       - name: Check MLflow connectivity
         run: |
           curl http://127.0.0.1:5000 || echo "MLflow not reachable"
-          
+
       - name: Run tests
         run: |
           pytest tests/
