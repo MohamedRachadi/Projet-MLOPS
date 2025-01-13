@@ -27,7 +27,7 @@ jobs:
 
       - name: Start API
         run: |
-          python -m uvicorn src.api:app --host 0.0.0.0 --port 8000 > uvicorn.log 2>&1 &
+          uvicorn src.api:app --reload > uvicorn.log 2>&1 &
           sleep 20  # Temps pour que l'API démarre
 
       - name: Check API logs
