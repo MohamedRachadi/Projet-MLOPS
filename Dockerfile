@@ -13,6 +13,9 @@ COPY requirements.txt /app/
 # Installer les dépendances nécessaires
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Installer MLflow dans le conteneur
+RUN pip install mlflow
+
 # Copier le reste du code de l'application dans le conteneur
 COPY . /app/
 
