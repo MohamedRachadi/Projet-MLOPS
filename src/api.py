@@ -25,7 +25,8 @@ except Exception as e:
 # Vérifier si le modèle a bien été chargé
 if model is None:
     print("Le modèle n'a pas pu être chargé correctement.")
-
+    raise HTTPException(status_code=500, detail="Le modèle MLflow n'a pas pu être chargé.")
+    
 # Définir un schéma Pydantic pour la validation des données entrantes
 class InputData(BaseModel):
     MedInc: float
@@ -41,7 +42,6 @@ class InputData(BaseModel):
 @app.post("/predict")
 def predict(data: InputData):
     if model is None:
-        print("NOOOOOOOOOOOOOOOOO MODELLLLLLLLLLLLL")
         raise HTTPException(status_code=500, detail="Le modèle n'est pas disponible pour la prédiction.")
     
     # Convertir les données entrantes en dataframe

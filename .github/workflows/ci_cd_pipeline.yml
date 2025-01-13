@@ -32,7 +32,7 @@ jobs:
 
       - name: Check API logs
         run: |
-          cat uvicorn.log || true
+          tail -n 100 uvicorn.log || true
 
       - name: Debug API startup
         run: |
@@ -54,9 +54,17 @@ jobs:
             fi
           done
       
-      - name: Check MLflow connectivity
+      - name: Wait for MLflow to be ready
         run: |
-          curl http://127.0.0.1:5000 || echo "MLflow not reachable"
+          timeout=60
+          while ! curl -s http://127.0.0.1:5000 > /dev/null; do
+            sleep 1
+            timeout=$((timeout - 1))
+            if [ $timeout -le 0 ]; then
+              echo "MLflow did not start in time."
+              exit 1
+            fi
+          done
 
       - name: Run tests
         run: |
