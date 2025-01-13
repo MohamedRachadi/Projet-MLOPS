@@ -7,8 +7,8 @@ import os
 
 # Récupérer l'adresse de MLflow selon l'environnement
 tracking_uri = "http://127.0.0.1:5000"  # En local
-if os.getenv("DOCKER", "false") == "true":
-    tracking_uri = "http://host.docker.internal:5000"  # Dans Docker
+#if os.getenv("DOCKER", "false") == "true":
+#    tracking_uri = "http://host.docker.internal:5000"  # Dans Docker
 
 # Création de l'application FastAPI
 app = FastAPI()
@@ -58,3 +58,4 @@ def predict(data: InputData):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur lors de la prédiction : {str(e)}")
+

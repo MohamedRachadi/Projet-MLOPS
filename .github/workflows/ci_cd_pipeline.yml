@@ -11,6 +11,13 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+
+    services:
+      mlflow:
+        image: "mlflow/mlflow:latest"  # Utilisation de l'image officielle de MLflow
+        options: --publish 5000:5000   # Publier le port 5000 pour accéder à l'API MLflow
+        # Démarrer le container MLflow
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -28,11 +35,15 @@ jobs:
       - name: Set PYTHONPATH for testing
         run: |
           export PYTHONPATH=$(pwd)/src:$PYTHONPATH
-          pytest tests/
 
-      #- name: Run tests
-      #  run: |
-      #    pytest tests/
+      - name: Wait for MLflow to be ready
+        run: |
+          # Attendre quelques secondes pour que MLflow démarre
+          sleep 30
+
+      - name: Run tests
+        run: |
+          pytest tests/  # Lancer les tests après l'attente
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,16 +54,16 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t mlops-api .
+          docker build -t mlops-api .  # Créer l'image Docker pour l'API
 
       - name: Run Docker container
         run: |
-          docker run -d --name mlops-api-container -p 8000:8000 mlops-api
+          docker run -d --name mlops-api-container -p 8000:8000 mlops-api  # Lancer l'API dans un container Docker
 
       - name: Wait for API to start
         run: |
-          sleep 10  # Attente pour le démarrage de l'API
+          sleep 10  # Attendre quelques secondes pour le démarrage de l'API
 
       - name: Test API endpoint
         run: |
-          curl --fail http://localhost:8000/predict || exit 1
+          curl --fail http://localhost:8000/predict || exit 1  # Vérifier que l'API fonctionne
