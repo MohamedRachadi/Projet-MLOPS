@@ -11,6 +11,6 @@ def test_predict():
         "Latitude": 34.5,
         "Longitude": -118.5
     }
-    response = requests.post("http://127.0.0.1:8000/predict", json=data)
+    response = requests.post("http://host.docker.internal:8000/predict", json=data)
     assert response.status_code == 200
     assert "prediction" in response.json()

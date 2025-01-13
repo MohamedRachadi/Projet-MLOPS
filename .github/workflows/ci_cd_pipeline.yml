@@ -46,6 +46,11 @@ jobs:
           docker build -t mlops-api .
           docker run -d -p 8000:8000 mlops-api  
 
+      # Attendre quelques secondes pour que l'API soit prête
+      - name: Wait for API to be ready
+        run: |
+          sleep 10  # Attendre 10 secondes, ajuste si nécessaire
+
       - name: Test if API is running
         run: |
           curl http://localhost:8000  
