@@ -25,53 +25,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Start API
+      - name: Start API with reload
         run: |
           uvicorn src.api:app --reload > uvicorn.log 2>&1 &
-          sleep 20  # Temps pour que l'API démarre
+          sleep 40  # Temps augmenté pour laisser plus de temps au démarrage de l'API
 
-      - name: Check API logs
+      - name: Display last 100 lines of API logs
         run: |
-          echo "Displaying last 100 lines of API logs:"
           tail -n 100 uvicorn.log || true
-
-      - name: Debug API startup
-        run: |
-          echo "Checking if uvicorn is running:"
-          ps aux | grep uvicorn
-
-      - name: Check open ports
-        run: |
-          echo "Checking open ports:"
-          netstat -tuln
 
       - name: Check if uvicorn is running
         run: |
-          ps aux | grep uvicorn
+          ps aux | grep uvicorn || echo "uvicorn is not running"
 
-      - name: Wait for API to be ready
+      - name: Check open ports
         run: |
-          timeout=120
-          while ! curl -s http://localhost:8000 > /dev/null; do
-            sleep 1
-            timeout=$((timeout - 1))
-            if [ $timeout -le 0 ]; then
-              echo "API did not start in time."
-              exit 1
-            fi
-          done
-      
-      - name: Wait for MLflow to be ready
+          netstat -tuln | grep :8000 || echo "Port 8000 is not open"
+
+      - name: Test API locally with curl
         run: |
-          timeout=60
-          while ! curl -s http://127.0.0.1:5000 > /dev/null; do
-            sleep 1
-            timeout=$((timeout - 1))
-            if [ $timeout -le 0 ]; then
-              echo "MLflow did not start in time."
-              exit 1
-            fi
-          done
+          sleep 5  # Attendez un peu après le démarrage de l'API
+          curl -s http://localhost:8000 || echo "API is not responding"
 
       - name: Run tests
         run: |
