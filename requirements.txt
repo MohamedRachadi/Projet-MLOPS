@@ -8,3 +8,4 @@ joblib
 streamlit
 requests
 pytest
+httpx
