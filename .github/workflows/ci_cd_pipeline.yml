@@ -36,9 +36,10 @@ jobs:
           docker build -t mlops-api .  # Construire l'image Docker de l'API
           docker run -d -p 5000:5000 mlops-api  # Lancer l'API en mode détaché sur le port 5000
 
-       - name: Wait for the API to be ready
-         run: |
+      - name: Wait for the API to be ready
+        run: |
           sleep 10
+          
       # Étape 5: Exécuter les tests unitaires avec Pytest
       - name: Run unit tests with Pytest
         run: |
