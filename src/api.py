@@ -60,4 +60,3 @@ def predict(data: InputData):
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur lors de la prédiction : {str(e)}")
-
