@@ -3,13 +3,14 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # Déclenche le pipeline sur un push sur la branche principale
+      - main
   pull_request:
     branches:
-      - main  # Déclenche le pipeline lors d'un PR vers la branche principale
+      - main
 
 jobs:
-  test1:
+  # Job 1 : Tests locaux sans Docker
+  test_local:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,62 +33,79 @@ jobs:
           source venv/bin/activate
           nohup uvicorn src.api:app --host 127.0.0.1 --port 8000 &
 
+      - name: Wait for API to be ready
+        run: |
+          echo "Waiting for API to be ready at http://127.0.0.1:8000"
+          for i in {1..10}; do
+            if curl -s http://127.0.0.1:8000 > /dev/null; then
+              echo "API is up and running"
+              break
+            else
+              echo "Waiting for API to be ready..."
+              sleep 5
+            fi
+          done
+
       - name: Run tests
         run: |
           source venv/bin/activate
           pytest --maxfail=3 --disable-warnings -q -n 4
 
-  # 2ème étape : Build et déploiement de l'API
-  deploy:
-    needs: test  # Cette étape dépend de l'étape 'test'
-    runs-on: ubuntu-latest  # Utilisation d'Ubuntu pour exécuter le déploiement
+  # Job 2 : Tests avec Docker
+  test_docker:
+    runs-on: ubuntu-latest
 
     steps:
-      # Vérifier le code du repo
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Configurer Python
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.11  # Utiliser la version de Python que vous utilisez
-
-      # Installer les dépendances
-      - name: Install dependencies
-        run: |
-          python -m venv venv  # Crée un environnement virtuel
-          source venv/bin/activate  # Active l'environnement virtuel
-          pip install -r requirements.txt  # Installe les dépendances à partir de requirements.txt
-
-      # Construire et lancer l'API dans Docker
       - name: Build and run FastAPI app in Docker
         run: |
           docker build -t mlops-api .  # Construire l'image Docker de l'API
-          docker run -d -p 8000:8000 --name api-container mlops-api  # Lancer l'API en mode détaché sur le port 8000
+          docker run -d -p 8000:8000 --name api-container mlops-api  # Lancer l'API en mode détaché
 
-      # Vérification des conteneurs Docker en cours d'exécution
-      - name: List Docker containers
-        run: docker ps
-
-      - name: View logs of the FastAPI container
+      - name: Wait for API to be ready
         run: |
-          docker logs api-container
+          echo "Waiting for API to be ready at http://127.0.0.1:8000"
+          for i in {1..10}; do
+            if curl -s http://127.0.0.1:8000 > /dev/null; then
+              echo "API is up and running"
+              break
+            else
+              echo "Waiting for API to be ready..."
+              sleep 5
+            fi
+          done
 
-      # Récupérer l'IP du conteneur et tester l'API
-      - name: Get container IP and check API
+      - name: Run tests
         run: |
-          container_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' api-container)
-          echo "Container IP is: $container_ip"
-          curl -f http://$container_ip:8000/predict || exit 1  # Teste l'API sur l'IP du conteneur
+          docker exec -i api-container pytest --maxfail=3 --disable-warnings -q -n 4
 
-      # Afficher les logs du conteneur pour débogage
-      - name: View logs of the FastAPI container
-        run: |
-          docker logs api-container
-
-      # Nettoyer les conteneurs Docker après le déploiement
       - name: Clean up Docker containers
         run: |
-          docker stop api-container  # Arrêter le conteneur Docker
-          docker rm api-container  # Supprimer le conteneur Docker
+          docker stop api-container
+          docker rm api-container
+
+  # Job 3 : Déploiement
+  deploy:
+    needs: [test_local, test_docker]  # Déploiement après succès des tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build and run FastAPI app in Docker
+        run: |
+          docker build -t mlops-api:latest .
+          docker run -d -p 8000:8000 --name deployed-container mlops-api:latest
+
+      - name: Verify deployment
+        run: |
+          echo "Checking deployed API"
+          curl -f http://127.0.0.1:8000 || exit 1
+
+      - name: Clean up Docker containers
+        run: |
+          docker stop deployed-container
+          docker rm deployed-container
