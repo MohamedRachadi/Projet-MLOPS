@@ -9,68 +9,23 @@ on:
       - main
 
 jobs:
-  # Job 1 : Tests sans Docker
   test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Vérifier le code du dépôt
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4  # Utiliser Python 3.9 (ou une version différente si nécessaire)
         with:
-          python-version: 3.11
+          python-version: 3.9
 
       - name: Install dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-
-      - name: Start FastAPI app
-        run: |
-          source venv/bin/activate
-          nohup uvicorn src.api:app --host 127.0.0.1 --port 8000 &
-
-      - name: Wait for API to be ready
-        run: |
-          echo "Waiting for API to be ready at http://127.0.0.1:8000"
-          for i in {1..10}; do
-            if curl -s http://127.0.0.1:8000 > /dev/null; then
-              echo "API is up and running"
-              break
-            else
-              echo "Waiting for API to be ready..."
-              sleep 5
-            fi
-          done
+          python -m pip install --upgrade pip  # Mettre à jour pip
+          pip install -r requirements.txt  # Installer les dépendances définies dans requirements.txt
 
       - name: Run tests
         run: |
-          source venv/bin/activate
-          pytest --maxfail=3 --disable-warnings -q -n 4
-
-  # Job 2 : Déploiement
-  deploy:
-    needs: test  # Exécute le déploiement après la réussite des tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Build and run FastAPI app in Docker
-        run: |
-          docker build -t mlops-api:latest .
-          docker run -d -p 8000:8000 --name deployed-container mlops-api:latest
-
-      - name: Verify deployment
-        run: |
-          echo "Checking deployed API"
-          curl -f http://127.0.0.1:8000 || exit 1
-
-      - name: Clean up Docker containers
-        run: |
-          docker stop deployed-container
-          docker rm deployed-container
+          pytest  # Exécuter les tests avec pytest
