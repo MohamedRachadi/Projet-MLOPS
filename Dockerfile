@@ -17,10 +17,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Exposer le port que l'API va utiliser
-EXPOSE 8000
+EXPOSE 5000
 
 # Lancer l'API avec Uvicorn
-CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "5000"]
 
 # Commande pour lancer MLflow en arrière-plan, puis démarrer FastAPI
 #CMD ["sh", "-c", "mlflow server --host 0.0.0.0 --port 5000 & uvicorn src.api:app --host 0.0.0.0 --port 8000"]
