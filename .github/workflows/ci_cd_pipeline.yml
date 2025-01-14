@@ -40,24 +40,16 @@ jobs:
       - name: List Docker containers
         run: docker ps
 
-      - name: Wait for FastAPI to be ready
+      - name: Wait for the API to be ready
         run: |
-          for i in {1..10}; do
-            if curl -s http://host.docker.internal:5000/predic; then
-              echo "FastAPI is ready"
-              break
-            else
-              echo "Waiting for FastAPI..."
-              sleep 5
-            fi
-          done
+          sleep 25  # Attendez que le conteneur soit prêt
 
       - name: Get container IP
         run: |
           container_id=$(docker ps -q -f "ancestor=mlops-api")
           container_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_id)
           echo "Container IP is: $container_ip"
-          echo "CONTAINER_IP=$container_ip" >> $GITHUB_ENV
+          echo "CONTAINER_IP=$container_ip" >> $GITHUB_ENV  # Utilise l'IP du conteneur
 
       - name: View logs of the FastAPI container
         run: |
@@ -65,8 +57,7 @@ jobs:
 
       - name: Check if FastAPI is running
         run: |
-          curl -f http://host.docker.internal:5000/predic || exit 1
-
+          curl -f http://$CONTAINER_IP:5000/predict || exit 1  # Utilise l'IP récupérée pour tester l'API
 
       # Étape 5: Exécuter les tests unitaires avec Pytest
       - name: Run unit tests with Pytest
