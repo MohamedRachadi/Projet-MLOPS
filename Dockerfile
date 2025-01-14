@@ -20,4 +20,7 @@ COPY . /app/
 EXPOSE 8000
 
 # Lancer l'API avec Uvicorn
-CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
+#CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# Commande pour lancer MLflow en arrière-plan, puis démarrer FastAPI
+CMD ["sh", "-c", "mlflow server --host 0.0.0.0 --port 5000 & uvicorn src.api:app --host 0.0.0.0 --port 8000"]

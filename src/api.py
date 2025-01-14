@@ -4,6 +4,8 @@ import mlflow
 import pandas as pd
 import os
 
+os.environ["MLFLOW_PARQUET_BACKEND"] = "false"
+
 # Récupérer l'adresse de MLflow selon l'environnement
 tracking_uri = "http://127.0.0.1:5000"  # En local
 if os.getenv("DOCKER", "false") == "true":
@@ -16,10 +18,11 @@ app = FastAPI()
 model = None
 try:
     mlflow.set_tracking_uri(tracking_uri)
-    model_name = "Best_Model_RandomForestRegressor"
-    model = mlflow.sklearn.load_model(f"models:/{model_name}/latest")
+    #model_name = "Best_Model_RandomForestRegressor"
+    model = mlflow.sklearn.load_model("models:/Best_Model_RandomForestRegressor/latest")
 except Exception as e:
     print(f"Erreur de connexion ou de chargement du modèle : {str(e)}")
+
 
 # Vérifier si le modèle a bien été chargé
 if model is None:
