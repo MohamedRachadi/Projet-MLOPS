@@ -43,7 +43,7 @@ jobs:
       - name: Wait for FastAPI to be ready
         run: |
           for i in {1..10}; do
-            if curl -s http://localhost:5000/predict; then
+            if curl -s http://host.docker.internal:5000/predic; then
               echo "FastAPI is ready"
               break
             else
@@ -65,7 +65,7 @@ jobs:
 
       - name: Check if FastAPI is running
         run: |
-          curl -f http://localhost:5000/predict || exit 1
+          curl -f http://host.docker.internal:5000/predic || exit 1
 
 
       # Étape 5: Exécuter les tests unitaires avec Pytest
