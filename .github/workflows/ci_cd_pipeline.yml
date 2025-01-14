@@ -35,15 +35,15 @@ jobs:
       - name: Build and run FastAPI app in Docker
         run: |
           docker build -t mlops-api .  # Construire l'image Docker de l'API
-          docker run -d -p 5000:5000 --name api-container mlops-api  # Lancer l'API en mode détaché sur le port 5000
+          docker run -d -p 8000:8000 --name api-container mlops-api  # Lancer l'API en mode détaché sur le port 8000
 
       # Attendre que l'API soit prête avant de tester
       - name: Wait for API to be ready
         run: |
           container_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' api-container)
-          echo "Waiting for API to be ready at http://$container_ip:5000"
+          echo "Waiting for API to be ready at http://$container_ip:8000"
           for i in {1..30}; do
-            if curl -s http://$container_ip:5000/predict > /dev/null; then
+            if curl -s http://$container_ip:8000/predict > /dev/null; then
               echo "API is up and running"
               break
             else
@@ -53,13 +53,13 @@ jobs:
           done
 
       - name: Export API URL
-        run: echo "API_URL=http://$container_ip:5000/predict" >> $GITHUB_ENV
+        run: echo "API_URL=http://$container_ip:8000/predict" >> $GITHUB_ENV
       
       # Exécuter les tests unitaires avec Pytest
       - name: Run unit tests with Pytest
         run: |
           source venv/bin/activate  # Activer l'environnement virtuel
-          export API_URL=http://$container_ip:5000/predict  # Définir l'URL de l'API
+          export API_URL=http://$container_ip:8000/predict  # Définir l'URL de l'API
           pytest --maxfail=1 --disable-warnings -q -n 4  # Exécuter les tests avec Pytest
 
       # Afficher les logs du conteneur pour débogage
@@ -100,7 +100,7 @@ jobs:
       - name: Build and run FastAPI app in Docker
         run: |
           docker build -t mlops-api .  # Construire l'image Docker de l'API
-          docker run -d -p 5000:5000 --name api-container mlops-api  # Lancer l'API en mode détaché sur le port 5000
+          docker run -d -p 8000:8000 --name api-container mlops-api  # Lancer l'API en mode détaché sur le port 8000
 
       # Vérification des conteneurs Docker en cours d'exécution
       - name: List Docker containers
@@ -111,7 +111,7 @@ jobs:
         run: |
           container_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' api-container)
           echo "Container IP is: $container_ip"
-          curl -f http://$container_ip:5000/predict || exit 1  # Teste l'API sur l'IP du conteneur
+          curl -f http://$container_ip:8000/predict || exit 1  # Teste l'API sur l'IP du conteneur
 
       # Afficher les logs du conteneur pour débogage
       - name: View logs of the FastAPI container
