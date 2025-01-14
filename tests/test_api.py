@@ -4,7 +4,7 @@ import time
 
 def test_model_serving():
     # L'URL de votre API MLflow servie
-    url = os.getenv("API_URL", "http://localhost:8000/predict")  # Utiliser l'URL récupérée via la variable d'environnement
+    url = os.getenv("API_URL", "http://127.0.0.1:8000/predict")  # Utiliser l'URL récupérée via la variable d'environnement
 
     # Données d'entrée pour tester le modèle (ici, un exemple basé sur le jeu de données California Housing)
     test_data = {

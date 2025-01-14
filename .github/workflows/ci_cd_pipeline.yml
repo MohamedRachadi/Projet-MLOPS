@@ -54,8 +54,7 @@ jobs:
 
       - name: Wait for API to be ready 2
         run: |
-          container_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' api-container)
-          echo "Waiting for API to be ready at http://$container_ip:8000"
+          echo "Waiting for API to be ready at http://127.0.0.1:8000"
           for i in {1..30}; do
             if curl -s http://127.0.0.1:8000/predict > /dev/null; then
               echo "API is up and running"
@@ -67,14 +66,14 @@ jobs:
           done
 
       - name: Export API URL
-        run: echo "API_URL=http://$container_ip:8000/predict" >> $GITHUB_ENV
+        run: echo "API_URL=http://$container_ip:8000/predict"
       
       # Exécuter les tests unitaires avec Pytest
       - name: Run unit tests with Pytest
         run: |
           source venv/bin/activate  # Activer l'environnement virtuel
-          export API_URL=http://$container_ip:8000/predict  # Définir l'URL de l'API
-          pytest --maxfail=1 --disable-warnings -q -n 4  # Exécuter les tests avec Pytest
+          export API_URL=http://127.0.0.1:8000/predict  # Définir l'URL de l'API
+          pytest --maxfail=3 --disable-warnings -q -n 4  # Exécuter les tests avec Pytest
 
       # Afficher les logs du conteneur pour débogage
       - name: View logs of the FastAPI container
