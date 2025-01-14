@@ -1,9 +1,11 @@
 import requests
+import os
 
 def test_model_serving():
     # L'URL de votre API MLflow servie
-    url = "http://localhost:5000/predict"  # Utilisation de /predict
+    #url = "http://localhost:5000/predict"  # Utilisation de /predict
     #url = "http://host.docker.internal:5000/predict"
+    url = "http://localhost:5000/predict" if os.getenv("DOCKER", "false") == "false" else "http://host.docker.internal:5000/predict"
 
     # Données d'entrée pour tester le modèle (ici, un exemple basé sur le jeu de données California Housing)
     test_data = {

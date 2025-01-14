@@ -31,11 +31,25 @@ jobs:
           source venv/bin/activate  # Active l'environnement virtuel
           pip install -r requirements.txt  # Installe les dépendances à partir de requirements.txt
 
+      # Attendre que l'API soit prête avant de tester
+      - name: Wait for API to be ready
+        run: |
+          # Attente active jusqu'à ce que l'API soit prête
+          for i in {1..30}; do
+            if curl -s http://localhost:5000/predict > /dev/null; then
+              echo "API is up and running"
+              break
+            else
+              echo "Waiting for API to be ready..."
+              sleep 5
+            fi
+          done
+
       # Exécuter les tests unitaires avec Pytest
       - name: Run unit tests with Pytest
         run: |
           source venv/bin/activate  # Activer l'environnement virtuel
-          pytest --maxfail=1 --disable-warnings -q  # Exécuter les tests avec Pytest
+          pytest --maxfail=1 --disable-warnings -q -n 4 # Exécuter les tests avec Pytest
 
       # Tester l'API servie
       - name: Test the FastAPI API serving
