@@ -9,7 +9,6 @@ on:
       - main  # Déclenche le pipeline lors d'un PR vers la branche principale
 
 jobs:
-
   test1:
     runs-on: ubuntu-latest
 
