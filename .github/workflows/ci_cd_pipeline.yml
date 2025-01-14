@@ -52,6 +52,20 @@ jobs:
             fi
           done
 
+      - name: Wait for API to be ready 2
+        run: |
+          container_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' api-container)
+          echo "Waiting for API to be ready at http://$container_ip:8000"
+          for i in {1..30}; do
+            if curl -s http://127.0.0.1:8000/predict > /dev/null; then
+              echo "API is up and running"
+              break
+            else
+              echo "Waiting for API to be ready..."
+              sleep 5
+            fi
+          done
+
       - name: Export API URL
         run: echo "API_URL=http://$container_ip:8000/predict" >> $GITHUB_ENV
       
