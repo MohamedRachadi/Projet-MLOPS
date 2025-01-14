@@ -38,8 +38,8 @@ jobs:
 
       - name: Wait for the API to be ready
         run: |
-          sleep 10
-          
+          sleep 20
+
       # Étape 5: Exécuter les tests unitaires avec Pytest
       - name: Run unit tests with Pytest
         run: |

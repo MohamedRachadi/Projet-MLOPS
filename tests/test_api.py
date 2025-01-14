@@ -2,8 +2,8 @@ import requests
 
 def test_model_serving():
     # L'URL de votre API MLflow servie
-    #url = "http://127.0.0.1:5000/predict"  # Utilisation de /predict
-    url = "http://host.docker.internal:5000/predict"
+    #url = "http://localhost/predict"  # Utilisation de /predict
+    #url = "http://host.docker.internal:5000/predict"
 
     # Données d'entrée pour tester le modèle (ici, un exemple basé sur le jeu de données California Housing)
     test_data = {
@@ -18,7 +18,7 @@ def test_model_serving():
     }
 
     # Requête POST à l'API
-    response = requests.post(url, json=test_data, timeout=10)
+    response = requests.post(url, json=test_data, timeout=20)
 
     # Vérification de la réponse
     assert response.status_code == 200, f"Expected status code 200 but got {response.status_code}"
