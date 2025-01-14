@@ -52,6 +52,9 @@ jobs:
             fi
           done
 
+      - name: Export API URL
+        run: echo "API_URL=http://$container_ip:5000/predict" >> $GITHUB_ENV
+      
       # Exécuter les tests unitaires avec Pytest
       - name: Run unit tests with Pytest
         run: |
