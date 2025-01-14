@@ -9,8 +9,37 @@ on:
       - main  # Déclenche le pipeline lors d'un PR vers la branche principale
 
 jobs:
+
+  test1:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+      - name: Start FastAPI app
+        run: |
+          source venv/bin/activate
+          nohup uvicorn src.api:app --host 127.0.0.1 --port 8000 &
+
+      - name: Run tests
+        run: |
+          source venv/bin/activate
+          pytest --maxfail=3 --disable-warnings -q -n 4
+
   # 1ère étape : Tests
-  test:
+  test2:
     runs-on: ubuntu-latest  # Utilisation d'Ubuntu pour exécuter les tests
 
     steps:
@@ -37,6 +66,11 @@ jobs:
           docker build -t mlops-api .  # Construire l'image Docker de l'API
           docker run -d -p 8000:8000 --name api-container mlops-api  # Lancer l'API en mode détaché sur le port 8000
 
+      # Afficher les logs du conteneur pour débogage
+      - name: View logs of the FastAPI container
+        run: |
+          docker logs api-container
+
       - name: Build and run FastAPI app in Docker
         run: docker ps
 
@@ -54,7 +88,9 @@ jobs:
           done
 
       - name: Export API URL
-        run: echo "API_URL=http://$container_ip:8000/predict"
+        run: |
+          container_ip=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' api-container)
+          echo "API_URL=http://$container_ip:8000/predict"
       
       # Exécuter les tests unitaires avec Pytest
       - name: Run unit tests with Pytest
@@ -62,11 +98,6 @@ jobs:
           source venv/bin/activate  # Activer l'environnement virtuel
           export API_URL=http://127.0.0.1:8000/predict  # Définir l'URL de l'API
           pytest --maxfail=3 --disable-warnings -q -n 4  # Exécuter les tests avec Pytest
-
-      # Afficher les logs du conteneur pour débogage
-      - name: View logs of the FastAPI container
-        run: |
-          docker logs api-container
 
       # Nettoyer les conteneurs Docker après le déploiement
       - name: Clean up Docker containers
@@ -106,6 +137,10 @@ jobs:
       # Vérification des conteneurs Docker en cours d'exécution
       - name: List Docker containers
         run: docker ps
+
+      - name: View logs of the FastAPI container
+        run: |
+          docker logs api-container
 
       # Récupérer l'IP du conteneur et tester l'API
       - name: Get container IP and check API
