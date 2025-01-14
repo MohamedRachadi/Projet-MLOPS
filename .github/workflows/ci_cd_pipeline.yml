@@ -31,6 +31,10 @@ jobs:
           nohup uvicorn src.api:app --host 127.0.0.1 --port 8000 &
           sleep 10  # Attendre 10 secondes pour être sûr que l'API est bien lancée
 
+      - name: Wait for API to be up
+        run: |
+          curl --silent --fail http://127.0.0.1:8000/predict || exit 1  # Attendre que l'API soit prête
+
       - name: Run tests
         run: |
           pytest tests/test_api.py  # Exécuter les tests
