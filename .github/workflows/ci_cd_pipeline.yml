@@ -44,10 +44,17 @@ jobs:
         run: |
           sleep 20
 
-      # Étape de débogage: Vérification si le service est disponible sur localhost:5000
+      - name: Get container IP
+        run: |
+          container_id=$(docker ps -q -f "ancestor=mlops-api")
+          container_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_id)
+          echo "Container IP is: $container_ip"
+          echo "CONTAINER_IP=$container_ip" >> $GITHUB_ENV
+
       - name: Check if FastAPI is running
         run: |
-          curl -f http://host.docker.internal:5000/predict || exit 1
+          curl -f http://$CONTAINER_IP:5000/predict || exit 1
+
 
       # Étape 5: Exécuter les tests unitaires avec Pytest
       - name: Run unit tests with Pytest
