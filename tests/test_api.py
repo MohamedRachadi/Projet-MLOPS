@@ -19,7 +19,7 @@ def test_model_serving():
     }
 
     # Attendre que l'API soit prête
-    retries = 30
+    retries = 15
     for _ in range(retries):
         try:
             response = requests.post(url, json=test_data, timeout=10)
