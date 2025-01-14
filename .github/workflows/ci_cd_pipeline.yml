@@ -9,70 +9,91 @@ on:
       - main  # Déclenche le pipeline lors d'un PR vers la branche principale
 
 jobs:
-  test_and_deploy:
+  # 1ère étape : Tests
+  test:
     runs-on: ubuntu-latest  # Utilisation d'Ubuntu pour exécuter les tests
 
     steps:
-      # Étape 1: Vérifier le code du repo
+      # Vérifier le code du repo
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Étape 2: Configurer Python
+      # Configurer Python
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.11  # Utiliser la version de Python que vous utilisez
 
-      # Étape 3: Installer les dépendances
+      # Installer les dépendances
       - name: Install dependencies
         run: |
           python -m venv venv  # Crée un environnement virtuel
           source venv/bin/activate  # Active l'environnement virtuel
           pip install -r requirements.txt  # Installe les dépendances à partir de requirements.txt
 
-      # Étape 4: Construire et lancer l'API dans Docker
-      - name: Build and run FastAPI app in Docker
-        run: |
-          docker build -t mlops-api .  # Construire l'image Docker de l'API
-          docker run -d -p 5000:5000 mlops-api  # Lancer l'API en mode détaché sur le port 5000
-
-      # Étape pour vérifier les conteneurs Docker en cours d'exécution
-      - name: List Docker containers
-        run: docker ps
-
-      - name: Wait for the API to be ready
-        run: |
-          sleep 25  # Attendez que le conteneur soit prêt
-
-      - name: Get container IP
-        run: |
-          container_id=$(docker ps -q -f "ancestor=mlops-api")
-          container_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_id)
-          echo "Container IP is: $container_ip"
-          echo "CONTAINER_IP=$container_ip" >> $GITHUB_ENV  # Utilise l'IP du conteneur
-
-      - name: View logs of the FastAPI container
-        run: |
-          docker logs $(docker ps -q -f "ancestor=mlops-api")
-
-      - name: Check if FastAPI is running
-        run: |
-          curl -f http://$CONTAINER_IP:5000/predict || exit 1  # Utilise l'IP récupérée pour tester l'API
-
-      # Étape 5: Exécuter les tests unitaires avec Pytest
+      # Exécuter les tests unitaires avec Pytest
       - name: Run unit tests with Pytest
         run: |
           source venv/bin/activate  # Activer l'environnement virtuel
           pytest --maxfail=1 --disable-warnings -q  # Exécuter les tests avec Pytest
 
-      # Étape 6: Tester l'API servie
+      # Tester l'API servie
       - name: Test the FastAPI API serving
         run: |
-          # Exécuter le test de l'API (doit appeler votre API déployée pour vérifier si elle fonctionne correctement)
-          python tests/test_api.py  # Assurez-vous que test_api.py fonctionne correctement
+          # Attendre que l'API soit prête avant de tester
+          sleep 20
+          container_id=$(docker ps -q -f "ancestor=mlops-api")
+          container_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_id)
+          curl -f http://$container_ip:5000/predict || exit 1
 
-      # Étape 7: Nettoyer les containers Docker après les tests
+  # 2ème étape : Build et déploiement de l'API
+  deploy:
+    needs: test  # Cette étape dépend de l'étape 'test'
+    runs-on: ubuntu-latest  # Utilisation d'Ubuntu pour exécuter le déploiement
+
+    steps:
+      # Vérifier le code du repo
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Configurer Python
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11  # Utiliser la version de Python que vous utilisez
+
+      # Installer les dépendances
+      - name: Install dependencies
+        run: |
+          python -m venv venv  # Crée un environnement virtuel
+          source venv/bin/activate  # Active l'environnement virtuel
+          pip install -r requirements.txt  # Installe les dépendances à partir de requirements.txt
+
+      # Construire et lancer l'API dans Docker
+      - name: Build and run FastAPI app in Docker
+        run: |
+          docker build -t mlops-api .  # Construire l'image Docker de l'API
+          docker run -d -p 5000:5000 mlops-api  # Lancer l'API en mode détaché sur le port 5000
+
+      # Vérification des conteneurs Docker en cours d'exécution
+      - name: List Docker containers
+        run: docker ps
+
+      # Récupérer l'IP du conteneur et tester l'API
+      - name: Get container IP and check API
+        run: |
+          container_id=$(docker ps -q -f "ancestor=mlops-api")
+          container_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_id)
+          echo "Container IP is: $container_ip"
+          curl -f http://$container_ip:5000/predict || exit 1  # Teste l'API sur l'IP du conteneur
+
+      # Afficher les logs du conteneur pour débogage
+      - name: View logs of the FastAPI container
+        run: |
+          docker logs $(docker ps -q -f "ancestor=mlops-api")
+
+      # Nettoyer les conteneurs Docker après le déploiement
       - name: Clean up Docker containers
         run: |
-          docker stop $(docker ps -q)  # Arrête tous les containers Docker en cours
-          docker rm $(docker ps -aq)  # Supprime tous les containers Docker
+          docker stop $(docker ps -q)  # Arrêter tous les conteneurs Docker en cours
+          docker rm $(docker ps -aq)  # Supprimer tous les conteneurs Docker
