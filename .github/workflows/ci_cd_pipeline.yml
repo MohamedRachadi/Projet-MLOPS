@@ -47,6 +47,10 @@ jobs:
       - name: Wait for API
         run: sleep 10
 
+      - name: Check API status
+        run: |
+          curl -X GET http://127.0.0.1:8000/docs || exit 1
+
       # Étape 5 : Exécuter le test API
       - name: Run API test
         run: pytest tests/test_api.py 
