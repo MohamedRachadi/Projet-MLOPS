@@ -13,9 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Étape 1 : Récupérer le code du dépôt
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Étape 2 : Installer Python et les dépendances
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -26,6 +28,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Étape 3 : Démarrer MLflow
+      - name: Start MLflow server
+        run: |
+          nohup mlflow server \
+            --backend-store-uri sqlite:///mlflow.db \
+            --host 127.0.0.1 \
+            --port 5000 &
+        timeout-minutes: 2
+
+      # Étape 4 : Démarrer l'API
+      - name: Start API server
+        run: |
+          nohup uvicorn src.api:app --host 127.0.0.1 --port 8000 &
+        timeout-minutes: 2
+
+      # Étape 5 : Vérifier que MLflow et l'API sont accessibles
+      - name: Wait for servers
+        run: |
+          sleep 10  # Donne le temps à MLflow et à l'API de démarrer
+
+      # Étape 6 : Exécuter les tests
       - name: Run tests
         run: |
           pytest tests/
