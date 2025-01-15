@@ -28,6 +28,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Étape 3 : Démarrer MLflow
+      - name: Start MLflow server
+        run: |
+          nohup mlflow server \
+            --backend-store-uri sqlite:///mlflow.db \
+            --host 127.0.0.1 \
+            --port 5000 &
+        timeout-minutes: 2
+
       # Étape 3 : Démarrer l'API
       - name: Start API server
         run: |
