@@ -48,10 +48,6 @@ jobs:
     - name: Check MLflow server logs
       run: docker logs mlflow_server || echo "No logs available"
 
-    - name: Register model in MLflow
-      run: |
-        python register_model.py  # Votre script pour enregistrer un modèle
-
     - name: Start API in Docker container
       run: |
         docker build -t my_api_image -f Dockerfile .
