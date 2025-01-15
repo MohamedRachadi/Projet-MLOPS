@@ -28,32 +28,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Étape 3 : Démarrer MLflow
-      - name: Start MLflow server
-        run: |
-          nohup mlflow server \
-            --backend-store-uri sqlite:///mlflow.db \
-            --host 127.0.0.1 \
-            --port 5000 &
-        timeout-minutes: 2
+      # Étape 3 : Tester le modèle directement
+      - name: Run model tests
+        run: pytest tests/test_model.py
 
-      # Étape 3 : Démarrer l'API
+      # Étape 4 : Démarrer l'API
       - name: Start API server
         run: |
-          uvicorn src.api:app --host 127.0.0.1 --port 8000 &
-        timeout-minutes: 2
+          nohup uvicorn src.api:app --host 127.0.0.1 --port 8000 &
 
-      # Étape 4 : Attendre que l'API soit prête
-      - name: Wait for API
+      # Étape 5 : Attendre que l'API soit prête
+      - name: Wait for API to start
         run: sleep 10
 
-      - name: Check API status
-        run: |
-          curl -X GET http://127.0.0.1:8000/docs || exit 1
-
-      # Étape 5 : Exécuter le test API
-      - name: Run API test
-        run: pytest tests/test_api.py 
+      # Étape 6 : Tester l'API
+      - name: Run API tests
+        run: pytest tests/test_api.py  
 
   docker-build-and-push:
     runs-on: ubuntu-latest
