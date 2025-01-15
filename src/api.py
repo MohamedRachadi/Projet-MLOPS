@@ -42,7 +42,7 @@ class InputData(BaseModel):
 
 @app.get("/health")
 def health_check():
-    return {"status": "OK"}
+    return {"status": "OK"}
 
 
 # Endpoint pour la prédiction
