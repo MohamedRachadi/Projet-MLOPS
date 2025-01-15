@@ -28,11 +28,20 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Start MLflow server
+      run: |
+        docker run -d --name mlflow_server -p 5001:5000 \
+          -v $(pwd)/mlruns:/mlruns \
+          -e MLFLOW_TRACKING_URI=http://0.0.0.0:5000 \
+          mlflow/mlflow:latest
+        sleep 10
+
     - name: Start API in Docker container
       run: |
         docker build -t my_api_image -f Dockerfile .
-        docker run -d --name api_container -p 5000:5000 my_api_image
-        sleep 15  # Attendre que l'API soit prête
+        docker run -d --name api_container -p 5000:5000 \
+          -v $(pwd)/mlruns:/mlruns my_api_image
+        sleep 15
 
     - name: Check API health
       run: |
@@ -47,21 +56,17 @@ jobs:
         echo "API did not respond in time."
         exit 1
 
-    - name: Wait for API to be ready
-      run: |
-        for i in {1..10}; do
-          curl -s http://localhost:5000/health || true
-          if [ $? -eq 0 ]; then break; fi
-          sleep 5
-        done
-
     - name: Run tests
       run: |
         . venv/bin/activate
         pytest tests --junitxml=results.xml
 
-    - name: Stop Docker container
+    - name: Check API logs
+      if: failure()
+      run: docker logs api_container
+
+    - name: Stop and clean Docker containers
       if: always()
       run: |
-        docker stop api_container
-        docker stop api_container
+        docker stop api_container mlflow_server || true
+        docker rm api_container mlflow_server || true
