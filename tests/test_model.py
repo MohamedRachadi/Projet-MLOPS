@@ -25,4 +25,4 @@ def test_model_prediction():
     assert len(prediction) == 1, "Le modèle n'a pas retourné une seule valeur."
     assert prediction[0] > 0, "La prédiction du modèle doit être un nombre positif."
 
-    print("Prédiction du modèle :", prediction[0])
+    print("Prédiction du modèle :", prediction[0])
