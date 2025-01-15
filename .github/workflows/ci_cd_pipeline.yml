@@ -31,18 +31,21 @@ jobs:
     - name: Prepare mlruns directory
       run: mkdir -p $(pwd)/mlruns
 
+    - name: Create Docker network
+      run: docker network create mlflow_network
+
     - name: Start MLflow server
       run: |
-        docker run -d --name mlflow_server -p 5001:5000 \
+        docker run -d --name mlflow_server --network mlflow_network -p 5001:5000 \
           -v $(pwd)/mlruns:/mlruns \
           -e MLFLOW_TRACKING_URI=http://0.0.0.0:5000 \
           ghcr.io/mlflow/mlflow:v2.5.0
-          sleep 10
+        sleep 10
 
     - name: Start API in Docker container
       run: |
         docker build -t my_api_image -f Dockerfile .
-        docker run -d --name api_container -p 5000:5000 \
+        docker run -d --name api_container --network mlflow_network -p 5000:5000 \
           -v $(pwd)/mlruns:/mlruns my_api_image
         sleep 15
 
