@@ -28,13 +28,16 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Prepare mlruns directory
+      run: mkdir -p $(pwd)/mlruns
+
     - name: Start MLflow server
       run: |
         docker run -d --name mlflow_server -p 5001:5000 \
           -v $(pwd)/mlruns:/mlruns \
           -e MLFLOW_TRACKING_URI=http://0.0.0.0:5000 \
-          mlflow/mlflow:latest
-        sleep 10
+          ghcr.io/mlflow/mlflow:v2.5.0
+          sleep 10
 
     - name: Start API in Docker container
       run: |
