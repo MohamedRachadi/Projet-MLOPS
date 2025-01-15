@@ -40,7 +40,7 @@ jobs:
       # Étape 3 : Démarrer l'API
       - name: Start API server
         run: |
-          nohup uvicorn src.api:app --host 127.0.0.1 --port 8000 &
+          uvicorn src.api:app --host 127.0.0.1 --port 8000 &
         timeout-minutes: 2
 
       # Étape 4 : Attendre que l'API soit prête
