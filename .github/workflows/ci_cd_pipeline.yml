@@ -49,7 +49,7 @@ jobs:
 
       # Étape 5 : Exécuter le test API
       - name: Run API test
-        run: pytest tests/test_api_simple.py 
+        run: pytest tests/test_api.py 
 
   docker-build-and-push:
     runs-on: ubuntu-latest
