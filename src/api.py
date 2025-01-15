@@ -8,8 +8,8 @@ os.environ["MLFLOW_PARQUET_BACKEND"] = "false"
 
 # Récupérer l'adresse de MLflow selon l'environnement
 tracking_uri = "http://127.0.0.1:5000"  # En local
-#if os.getenv("DOCKER", "false") == "true":
-#    tracking_uri = "http://mlflow_server:8000"  # Dans Docker
+if os.getenv("DOCKER", "false") == "true":
+    tracking_uri = "http://host.docker.internal:5000"  # Dans Docker
 
 # Création de l'application FastAPI
 app = FastAPI()
