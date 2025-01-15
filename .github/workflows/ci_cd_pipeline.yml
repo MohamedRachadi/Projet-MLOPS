@@ -51,14 +51,14 @@ jobs:
     - name: Start API in Docker container
       run: |
         docker build -t my_api_image -f Dockerfile .
-        docker run -d --name api_container --network mlflow_network -p 5000:5000 \
+        docker run -d --name api_container --network mlflow_network -p 8000:8000 \
           -v $(pwd)/mlruns:/mlruns my_api_image
         sleep 15
 
     - name: Check API health
       run: |
         for i in {1..30}; do
-          if curl -s http://localhost:5000/health; then
+          if curl -s http://localhost:8000; then
             echo "API is ready!"
             exit 0
           fi
