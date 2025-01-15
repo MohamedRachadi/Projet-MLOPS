@@ -28,7 +28,7 @@ jobs:
 
       - name: Start the FastAPI app
         run: |
-          nohup uvicorn src.api:app --host 127.0.0.1 --port 8000 &
+          nohup uvicorn src.api:app --host 127.0.0.1 --port 8000 > uvicorn_log.txt 2>&1 &
           sleep 30  # Attendre 10 secondes pour être sûr que l'API est bien lancée
           cat uvicorn_log.txt
           
