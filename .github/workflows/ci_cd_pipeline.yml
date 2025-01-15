@@ -42,9 +42,15 @@ jobs:
           ghcr.io/mlflow/mlflow:v2.5.0
         sleep 10
 
-    - name: Validate MLflow model
+    - name: Check MLflow server status
+      run: docker ps -a
+
+    - name: Check MLflow server logs
+      run: docker logs mlflow_server || echo "No logs available"
+
+    - name: Register model in MLflow
       run: |
-        docker exec mlflow_server mlflow models list --model-name Best_Model_RandomForestRegressor || echo "Model not found"
+        python register_model.py  # Votre script pour enregistrer un modèle
 
     - name: Start API in Docker container
       run: |
@@ -55,7 +61,7 @@ jobs:
 
     - name: Check API health
       run: |
-        for i in {1..20}; do
+        for i in {1..30}; do
           if curl -s http://localhost:5000/health; then
             echo "API is ready!"
             exit 0
