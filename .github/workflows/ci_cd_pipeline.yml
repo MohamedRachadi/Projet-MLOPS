@@ -63,5 +63,5 @@ jobs:
     - name: Stop Docker container
       if: always()
       run: |
-      docker stop api_container
-      docker stop api_container
+        docker stop api_container
+        docker stop api_container
