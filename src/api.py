@@ -40,6 +40,11 @@ class InputData(BaseModel):
     Latitude: float
     Longitude: float
 
+@app.get("/health")
+def health_check():
+    return {"status": "OK"}
+
+    
 # Endpoint pour la prédiction
 @app.post("/predict")
 def predict(data: InputData):

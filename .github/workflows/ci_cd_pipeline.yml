@@ -28,10 +28,24 @@ jobs:
         pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Start Docker container for API
+    - name: Start API in Docker container
       run: |
-        docker build -t api_image .
-        docker run -d --name api_container -p 5000:5000 api_image
+        docker build -t my_api_image -f Dockerfile .
+        docker run -d --name api_container -p 5000:5000 my_api_image
+        sleep 15  # Attendre que l'API soit prête
+
+    - name: Check API health
+      run: |
+        for i in {1..10}; do
+          if curl -s http://localhost:5000/health; then
+            echo "API is ready!"
+            exit 0
+          fi
+          echo "Waiting for API..."
+          sleep 5
+        done
+        echo "API did not respond in time."
+      exit 1
 
     - name: Wait for API to be ready
       run: |
@@ -48,4 +62,6 @@ jobs:
 
     - name: Stop Docker container
       if: always()
-      run: docker stop api_container
+      run: |
+      docker stop api_container
+      docker stop api_container
