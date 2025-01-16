@@ -39,6 +39,14 @@ jobs:
       - name: Wait for MLflow server to start
         run: sleep 10
 
+      - name: Start API
+        run: |
+          cd src
+          nohup python -m uvicorn api:app --host 0.0.0.0 --port 8000 &
+          cd ..
+        env:
+          MLFLOW_TRACKING_URI: http://127.0.0.1:5000
+
       # *Nouvelle Étape : Exécuter le script main.py*
       - name: Run main.py to train and register the model
         run: |
