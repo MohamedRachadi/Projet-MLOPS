@@ -58,13 +58,13 @@ jobs:
 
       # Étape 5 : Exécuter les tests sur le modèle
       - name: Run model tests
-        run: pytest tests/test_model.py
+        run: pytest tests/test_model.py --disable-warnings
         env:
           MLFLOW_TRACKING_URI: http://127.0.0.1:5000
 
       # Étape 5 : Exécuter les tests sur l'API
       - name: Run API tests
-        run: pytest tests/test_api.py
+        run: pytest tests/test_api.py --disable-warnings
         env:
           MLFLOW_TRACKING_URI: http://127.0.0.1:5000
 
