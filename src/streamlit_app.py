@@ -3,7 +3,7 @@ import requests
 
 # URL de ton API FastAPI, assure-toi qu'elle soit en marche (par exemple, localhost si tu testes localement)
 #API_URL = "http://127.0.0.1:8000/predict"
-API_URL = "http://api-container:8000/predict"
+API_URL = "http://localhost:8000/predict"
 
 # Fonction pour obtenir la prédiction via l'API
 def get_prediction(data):
