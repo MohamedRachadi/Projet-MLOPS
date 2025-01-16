@@ -36,4 +36,4 @@ data_drift_report.run(reference_data=train_data, current_data=production_data)
 # Sauvegarder un rapport HTML
 data_drift_report.save_html("data_drift_table_report.html")
 
-print("Rapport de data drift généré : data_drift_table_report.html")
+print("Rapport de data drift généré : data_drift_table_report.html ")
