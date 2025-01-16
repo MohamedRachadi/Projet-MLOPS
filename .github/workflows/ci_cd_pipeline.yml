@@ -41,7 +41,7 @@ jobs:
 
       # *Nouvelle Étape : Exécuter le script main.py*
       - name: Run main.py to train and register the model
-        run: python main.py
+        run: python src/main.py
         env:
           MLFLOW_TRACKING_URI: http://127.0.0.1:5000
 
