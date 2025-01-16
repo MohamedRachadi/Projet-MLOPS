@@ -12,3 +12,4 @@ requests
 pytest
 pytest-xdist
 httpx
+evidently
