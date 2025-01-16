@@ -28,13 +28,13 @@ Un script essentiel pour surveiller les performances du modèle en production. I
 - Détecte les "drifts" de données et génère un rapport HTML.
 
 ### 5. **model_classes.py**
-Ce fichier est au cœur du pipeline de machine learning. Il contient :
+Ce fichier est au cœur du pipeline. Il contient :
 - Les classes pour entraîner et évaluer les modèles.
 - L'optimisation des hyperparamètres via la recherche bayésienne.
 - L'enregistrement des expériences dans MLflow pour le suivi.
 
 ### 6. **streamlit_app.py**
-Une interface conviviale pour interagir avec le modèle. L'application permet :
+L'interface conviviale pour interagir avec le modèle. L'application permet :
 - De saisir des données en entrée (revenu, âge des maisons, etc.).
 - De recevoir les prédictions directement via l'API.
 
@@ -48,7 +48,7 @@ Liste des dépendances Python nécessaires, comme :
 - `evidently` pour l'analyse des drifts.
 
 ### 9. **data_drift_table_report.html**
-Un rapport généré automatiquement par `evidently` pour analyser les variations dans les données de production. Ce fichier est essentiel pour comprendre les impacts sur les performances du modèle.
+Le rapport généré automatiquement par `evidently` pour analyser les variations dans les données de production. Ce fichier est essentiel pour comprendre les impacts sur les performances du modèle.
 
 ## Modèle Choisi : Random Forest
 Après avoir comparé plusieurs modèles, notamment Random Forest, Gradient Boosting et la Régression linéaire, le choix s'est porté sur Random Forest pour les raisons suivantes :
@@ -76,44 +76,19 @@ Après avoir comparé plusieurs modèles, notamment Random Forest, Gradient Boos
 Le modèle Random Forest a été enregistré dans MLflow pour un suivi rigoureux et un déploiement facile.
 
 ## Rapport Evidently : data_drift_table_report.html
-Ce rapport est un outil essentiel pour surveiller les changements dans les données de production. Il fournit :
-- **Un score de drift global** pour évaluer la gravité des changements.
-- **Des visualisations par variable** pour identifier celles qui ont le plus changé.
-- **Des recommandations** pour savoir si un réentraînement est nécessaire.
+Le rapport de dérive des données révèle que 100% des colonnes présentent un drift entre les données d’entraînement et de production. Les colonnes "AveBedrms" et "Population" montrent des dérives significatives, indiquant des changements dans les caractéristiques des logements et des migrations démographiques. La "MedInc" a également subi une dérive modérée. Le modèle risque d'être impacté par ces dérives, surtout pour les variables importantes. Il est recommandé de surveiller les performances du modèle, d’envisager un réentraînement si nécessaire et d’implémenter un suivi continu pour anticiper les futurs problèmes.
 
 ## Des solutions de réentraînement en Cas de Drift
 
-1. **Surveillance continue du drift** :
-   - Intégrer une surveillance automatique des rapports HTML générés par `Evidently`.
-   - Configurer des seuils d'alerte sur le score de drift global ou par variable (comme dans le rapport `data_drift_table_report.html`).
+1. **Réentraînement complet avec données mixtes** :
+   - Cette approche consiste à combiner 70 % des nouvelles données de production avec 30 % des anciennes données d’entraînement. Le modèle est ensuite entièrement réentraîné sur cet ensemble combiné. Cette méthode permet de capturer à la fois les tendances anciennes et nouvelles, assurant que le modèle reste pertinent face aux évolutions des données. Cependant, elle nécessite des ressources importantes en termes de temps et de calcul. Elle est recommandée lorsque les ressources sont disponibles et que le drift est significatif à travers l'ensemble des données.
 
-2. **Collecte régulière de données** :
-   - Collecter et stocker de nouvelles données de production pour enrichir le jeu de données d’entraînement.
-   - S'assurer que ces nouvelles données reflètent les changements dans la distribution des variables.
+2. **Fine-tuning du modèle actuel** :
+   - Le fine-tuning consiste à ajuster uniquement les poids du modèle existant en utilisant les nouvelles données. Ce processus est plus rapide et moins coûteux que le réentraînement complet, car il préserve les connaissances acquises sur les données historiques tout en adaptant le modèle aux nouvelles tendances. Cette approche est idéale lorsque le modèle reste globalement performant mais montre des dégradations sur certaines parties des données.
 
-3. **Réentraîner le modèle** :
-   - Réentraîner le modèle en utilisant les nouvelles données collectées.
-   - Comparer les performances du modèle réentraîné avec le modèle actuel avant de le déployer.
+3. **Détection et pondération des données représentatives** :
+   - Cette méthode consiste à identifier les segments de données où le drift est le plus marqué, puis à appliquer un réentraînement en pondérant ces segments de manière prioritaire. Cela permet au modèle de se concentrer sur les zones problématiques tout en économisant des ressources, ce qui est particulièrement utile lorsque le drift est localisé, comme sur certaines colonnes (par exemple, "Population" ou "MedInc").
 
-4. **Enrichissement du modèle** :
-   - Ajouter de nouvelles variables pertinentes si nécessaire, pour capturer les nouvelles tendances détectées dans les données.
-
-5. **Test A/B** :
-   - Mettre en place un test A/B pour valider les performances du nouveau modèle sur une partie de la production avant un déploiement complet.
-
-6. **Fine-tuning du modèle existant** :
-   - Si le modèle choisi est un algorithme comme Random Forest, effectuer un ajustement léger en réutilisant les arbres existants avec des données actualisées.
-   - Cette méthode est plus rapide et moins coûteuse qu’un réentraînement complet.
-
-7. **Validation croisée rigoureuse** :
-   - Utiliser une validation croisée avec des métriques comme RMSE, MAE et R² pour évaluer les performances des modèles mis à jour.
-
-8. **Automatisation avec des pipelines MLOps** :
-   - Automatiser le processus de détection de drift, de collecte de données et de réentraînement via des outils comme MLflow ou Kubeflow.
-   - Par exemple, en intégrant un workflow où le rapport Evidently déclenche automatiquement le réentraînement.
-
-9. **Mise à jour itérative** :
-   - Mettre en place des mises à jour régulières du modèle (par exemple, tous les mois ou trimestres) pour limiter l’accumulation de drift.
 
 ## Instructions d’Utilisation
 ### Prérequis
@@ -124,24 +99,47 @@ Ce rapport est un outil essentiel pour surveiller les changements dans les donn�
   ```
 
 ### Lancer l’API
+1. Démarrer l'interface de MLflow :
+```bash
+mflow ui
+```
+2. Lancer l'API :
 ```bash
 uvicorn api:app --reload
 ```
 Endpoint : `http://127.0.0.1:8000/predict`
+Documentation : Ouvrir `http://127.0.0.1:8000/docs`
 
 ### Lancer l’Application Streamlit
+1. Démarrer l'interface de MLflow :
+```bash
+mlflow ui
+```
+2. Lancer l'API :
+```bash
+uvicorn api:app --reload
+```
+3. Démarrer l'application Streamlit :
+```bash
+streamlit run streamlit_app.py
+``` 
+
+### Utilisation de Docker
+1. Lancer mlflow :
+```bash
+mlflow ui
+```
+2. Télécharger l'image Docker :
+```bash
+docker pull mohamedrachadi/ml-api:latest  
+```
+3. Lancer le conteneur Docker :
+```bash
+docker run -p 8000:8000 mohamedrachadi/ml-api:latest
+```
+4. Démarrer l'application Streamlit :
 ```bash
 streamlit run streamlit_app.py
 ```
-
-### Utilisation de Docker
-1. Construire l'image :
-   ```bash
-   docker build -t prix-immobilier-app .
-   ```
-2. Lancer le conteneur :
-   ```bash
-   docker run -p 8000:8000 prix-immobilier-app
-   ```
 
 
