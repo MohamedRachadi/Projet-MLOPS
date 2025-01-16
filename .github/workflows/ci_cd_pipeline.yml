@@ -68,14 +68,14 @@ jobs:
         env:
           MLFLOW_TRACKING_URI: http://127.0.0.1:5000
 
-  docker-build-and-push:
-    runs-on: ubuntu-latest
-    needs: test
+  #docker-build-and-push:
+  #  runs-on: ubuntu-latest
+  #  needs: test
 
-    steps:
+  #  steps:
       # Étape 1 : Récupérer le code source
-      - name: Checkout repository
-        uses: actions/checkout@v3
+  #    - name: Checkout repository
+  #      uses: actions/checkout@v3
 
       # Étape 2 : Se connecter à DockerHub
       - name: Log in to DockerHub
