@@ -54,6 +54,12 @@ jobs:
         env:
           MLFLOW_TRACKING_URI: http://127.0.0.1:5000
 
+      # Étape 5 : Exécuter les tests sur l'API
+      - name: Run API tests
+        run: pytest tests/test_api.py
+        env:
+          MLFLOW_TRACKING_URI: http://127.0.0.1:5000
+
   docker-build-and-push:
     runs-on: ubuntu-latest
     needs: test
