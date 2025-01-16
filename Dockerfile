@@ -17,10 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Exposer le port que l'API va utiliser
-#EXPOSE 8000
-EXPOSE 8000 8501
+EXPOSE 8000
 
-# Commande pour démarrer l'API et Streamlit en parallèle
+# Lancer l'API avec Uvicorn
 CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
-#CMD [uvicorn src.api:app --host 0.0.0.0 --port 8000] & \
-#    streamlit run src/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
