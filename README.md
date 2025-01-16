@@ -107,7 +107,7 @@ mflow ui
 ```bash
 uvicorn api:app --reload
 ```
-Endpoint : `http://127.0.0.1:8000/predict`
+Endpoint : `http://127.0.0.1:8000/predict`  
 Documentation : Ouvrir `http://127.0.0.1:8000/docs`
 
 ### Lancer l’Application Streamlit
