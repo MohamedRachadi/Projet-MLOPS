@@ -9,15 +9,16 @@ on:
       - main
 
 jobs:
+  # Étape 1 : Tests unitaires avec Pytest
   test:
     runs-on: ubuntu-latest
 
     steps:
-      # Étape 1 : Récupérer le code source
+      # Récupérer le code source
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Étape 2 : Installer Python et les dépendances
+      # Installer Python et les dépendances
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -28,18 +29,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Étape 3 : Démarrer le serveur MLflow
+      # Démarrer le serveur MLflow
       - name: Start MLflow server
         run: |
           nohup mlflow server --backend-store-uri sqlite:///mlflow.db --host 127.0.0.1 --port 5000 &
         env:
           MLFLOW_TRACKING_URI: http://127.0.0.1:5000
 
-      # Étape 4 : Attendre que le serveur MLflow soit prêt
+      # Attendre que le serveur MLflow soit prêt
       - name: Wait for MLflow server to start
         run: sleep 10
 
-      # *Nouvelle Étape : Exécuter le script main.py*
+      # Exécuter le script principal pour entraîner et enregistrer le modèle
       - name: Run main.py to train and register the model
         run: |
           cd src
@@ -48,44 +49,42 @@ jobs:
         env:
           MLFLOW_TRACKING_URI: http://127.0.0.1:5000
 
-      # Étape 5 : Exécuter les tests sur le modèle
-      - name: Run model tests
-        run: pytest tests/test_model.py
+      # Exécuter les tests unitaires sur le modèle
+      - name: Run Pytest
+        run: pytest tests/
         env:
           MLFLOW_TRACKING_URI: http://127.0.0.1:5000
 
-  docker-build-and-push:
+  # Étape 2 : Build et déploiement de l'API
+  docker-build-and-deploy:
     runs-on: ubuntu-latest
     needs: test
 
     steps:
+      # Récupérer le code source
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Se connecter à DockerHub
       - name: Log in to DockerHub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Construire l'image Docker pour l'API
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/ml-api:latest .
 
-      - name: Push Docker image to DockerHub
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/ml-api:latest
+   
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: docker-build-and-push
-
-    steps:
-      - name: Deploy to server
+      # En l'absence de serveur distant, démarrer le conteneur localement
+      - name: Run Docker container locally
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          docker pull ${{ secrets.DOCKER_USERNAME }}/ml-api:latest
-          docker stop ml-api || true
-          docker rm ml-api || true
           docker run -d -p 8000:8000 --name ml-api ${{ secrets.DOCKER_USERNAME }}/ml-api:latest
-          EOF
+
+      # Tester le serving du modèle via l'API et MLflow
+      - name: Test the running API and MLflow
+        run: |
+          curl http://localhost:8000/docs
