@@ -89,6 +89,28 @@ Le rapport de dérive des données révèle que 100% des colonnes présentent un
 3. **Détection et pondération des données représentatives** :
    - Cette méthode consiste à identifier les segments de données où le drift est le plus marqué, puis à appliquer un réentraînement en pondérant ces segments de manière prioritaire. Cela permet au modèle de se concentrer sur les zones problématiques tout en économisant des ressources, ce qui est particulièrement utile lorsque le drift est localisé, comme sur certaines colonnes (par exemple, "Population" ou "MedInc").
 
+## Pipeline CI/CD
+
+Le pipeline CI/CD assure la qualité et l’automatisation du déploiement avec deux jobs principaux, **test** et **docker-build-and-push**, chacun comprenant des étapes spécifiques :
+
+### 1. Job : Test
+
+- **Étape 1 :** Récupération du code source avec `actions/checkout`.
+- **Étape 2 :** Configuration de Python (version 3.11) et installation des dépendances avec `requirements.txt`.
+- **Étape 3 :** Démarrage du serveur MLflow localement via SQLite.
+- **Étape 4 :** Exécution du script `main.py` pour entraîner et enregistrer le modèle.
+- **Étape 5 :** Démarrage de l’API FastAPI sur le port 8000.
+- **Étape 6 :** Exécution des tests unitaires pour :
+  - Le modèle (`tests/test_model.py`).
+  - L’API (`tests/test_api.py`).
+
+### 2. Job : Docker Build and Push
+
+- **Étape 1 :** Authentification sur DockerHub avec les secrets (`DOCKER_USERNAME` et `DOCKER_PASSWORD`).
+- **Étape 2 :** Création de l’image Docker pour l’application.
+- **Étape 3 :** Publication de l’image Docker sur DockerHub avec le tag `latest`.
+
+Ce pipeline est déclenché automatiquement sur chaque `push` ou `pull request` vers la branche `main` et garantit une intégration fluide et un déploiement automatisé.
 
 ## Instructions d’Utilisation
 ### Prérequis
