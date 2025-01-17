@@ -78,7 +78,7 @@ Le modèle Random Forest a été enregistré dans MLflow pour un suivi rigoureux
 ## Rapport Evidently : data_drift_table_report.html
 Le rapport de dérive des données révèle que 100% des colonnes présentent un drift entre les données d’entraînement et de production. Les colonnes "AveBedrms" et "Population" montrent des dérives significatives, indiquant des changements dans les caractéristiques des logements et des migrations démographiques. La "MedInc" a également subi une dérive modérée. Le modèle risque d'être impacté par ces dérives, surtout pour les variables importantes. Il est recommandé de surveiller les performances du modèle, d’envisager un réentraînement si nécessaire et d’implémenter un suivi continu pour anticiper les futurs problèmes.
 
-## Des solutions de réentraînement en Cas de Drift
+### Des solutions de réentraînement en Cas de Drift
 
 1. **Réentraînement complet avec données mixtes** :
    - Cette approche consiste à combiner 70 % des nouvelles données de production avec 30 % des anciennes données d’entraînement. Le modèle est ensuite entièrement réentraîné sur cet ensemble combiné. Cette méthode permet de capturer à la fois les tendances anciennes et nouvelles, assurant que le modèle reste pertinent face aux évolutions des données. Cependant, elle nécessite des ressources importantes en termes de temps et de calcul. Elle est recommandée lorsque les ressources sont disponibles et que le drift est significatif à travers l'ensemble des données.
