@@ -123,7 +123,7 @@ Ce pipeline est déclenché automatiquement sur chaque `push` ou `pull request` 
 ### Lancer l’API
 1. Démarrer l'interface de MLflow :
 ```bash
-mflow ui
+mlflow ui
 ```
 2. Lancer l'API :
 ```bash
