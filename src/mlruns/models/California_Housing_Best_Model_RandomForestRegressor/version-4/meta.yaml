@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1736595942442
+current_stage: None
+description: ''
+last_updated_timestamp: 1736595942442
+name: California_Housing_Best_Model_RandomForestRegressor
+run_id: 5416af88d0554ff3bb07d21a26631903
+run_link: ''
+source: mlflow-artifacts:/616656509998415542/5416af88d0554ff3bb07d21a26631903/artifacts/best_model
+status: READY
+status_message: null
+storage_location: mlflow-artifacts:/616656509998415542/5416af88d0554ff3bb07d21a26631903/artifacts/best_model
+user_id: null
+version: 4

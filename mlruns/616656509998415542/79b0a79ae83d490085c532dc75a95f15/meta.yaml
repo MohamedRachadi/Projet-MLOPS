@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/616656509998415542/79b0a79ae83d490085c532dc75a95f15/artifacts
+end_time: 1736977750107
+entry_point_name: ''
+experiment_id: '616656509998415542'
+lifecycle_stage: active
+run_id: 79b0a79ae83d490085c532dc75a95f15
+run_name: Random Forest
+run_uuid: 79b0a79ae83d490085c532dc75a95f15
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1736977737955
+status: 3
+tags: []
+user_id: mrach

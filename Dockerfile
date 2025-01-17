@@ -1,6 +1,9 @@
 # Utiliser une image officielle de Python comme image de base
 FROM python:3.11-slim
 
+# Définir une variable d'environnement pour indiquer que l'application tourne dans Docker
+ENV DOCKER=true
+
 # Définir un répertoire de travail dans le conteneur
 WORKDIR /app
 
